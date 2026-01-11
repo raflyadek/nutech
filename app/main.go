@@ -32,6 +32,7 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	bannerRepository := repository.NewBannerRepository(db)
 	serviceRepository := repository.NewServiceRepository(db)
+	
 
 	//service
 	userService := service.NewUserService(userRepository)
@@ -76,6 +77,7 @@ func main() {
 	protectedRoute.GET("/services", servicesController.GetAllService)
 	protectedRoute.GET("/balance", userController.GetBalanceByEmail)
 	protectedRoute.POST("/topup", userController.UpdateBalanceByEmail)
+	
 	
 	port := os.Getenv("PORT")
 	// if port empty just make it 8080

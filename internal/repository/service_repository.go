@@ -35,3 +35,16 @@ func (sr *ServiceRepo) GetAllServices() ([]entity.Service, error) {
 
 	return service, nil
 }
+
+func (sr *ServiceRepo) GetServiceByCode(serviceCode string) (entity.Service, error) {
+	var service entity.Service
+	err := sr.db.QueryRowContext(context.Background(), `
+	SELECT service_code, service_name, service_icon, service_tariff FROM service WHERE service_code = $1`, serviceCode, 
+	).Scan(&service.ServiceCode, &service.ServiceName, &service.ServiceIcon, &service.ServiceTariff)
+
+	if err != nil {
+		return entity.Service{}, err
+	}
+
+	return service, nil
+}
