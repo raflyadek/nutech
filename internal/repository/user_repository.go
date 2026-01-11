@@ -105,3 +105,14 @@ func (ur *UserRepo) UpdateBalanceByEmail(saldo *entity.Saldo) (entity.Saldo, err
 
 	return *saldo, nil
 }
+
+func (ur *UserRepo) CreateSaldoByEmail(saldo *entity.Saldo) error {
+	_, err := ur.db.ExecContext(context.Background(), `
+	INSERT INTO saldo (user_email, balance) VALUES ($1, $2)`, saldo.UserEmail, saldo.Balance)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
