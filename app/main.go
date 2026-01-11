@@ -35,7 +35,7 @@ func main() {
 	transactionRepository := repository.NewTransactionRepository(db)
 
 	//service
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, transactionRepository)
 	bannerService := service.NewBannerService(bannerRepository)
 	servicesService := service.NewServiceService(serviceRepository)
 	transactionService := service.NewTransactionService(transactionRepository, serviceRepository, userRepository)
