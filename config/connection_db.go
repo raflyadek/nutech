@@ -16,13 +16,14 @@ func ConnectionDb() (*sql.DB, error) {
 		log.Printf("failed load env %s", err)
 	}
 
-	dbUserame := os.Getenv("DB_USERNAME")
-	dbName := os.Getenv("DB_NAME")
-	pgPort := os.Getenv("PGPORT")
-	host := os.Getenv("HOST")
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable", host, pgPort, dbUserame, dbName)
+	// dbUserame := os.Getenv("DB_USERNAME")
+	// dbName := os.Getenv("DB_NAME")
+	// pgPort := os.Getenv("PGPORT")
+	// host := os.Getenv("HOST")
+	postgreURL := os.Getenv("POSTGRE_URL")
+	// dsn := fmt.Sprintf("")
 
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("postgres", postgreURL)
 	if err != nil {
 		log.Printf("failed open db %s", err)
 	}

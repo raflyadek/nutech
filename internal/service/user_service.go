@@ -19,6 +19,7 @@ type UserRepository interface {
 	UpdateImageByEmail(user *entity.User) (entity.User, error)
 	GetBalanceByEmail(email string) (entity.Saldo, error)
 	UpdateBalanceByEmail(saldo *entity.Saldo) (entity.Saldo, error)
+	CreateSaldoByEmail(saldo *entity.Saldo) error
 }
 
 type UserServ struct {
@@ -45,6 +46,14 @@ func(us *UserServ) CreateUser(req dto.UserRegisterRequest) error {
 
 	if err := us.userRepository.Create(user); err != nil {
 		return fmt.Errorf("create user %s", err)
+	}
+
+	saldo := entity.Saldo{
+		UserEmail: req.Email,
+		Balance: 0,
+	}
+	if err := us.userRepository.CreateSaldoByEmail(&saldo); err != nil {
+		return fmt.Errorf("create saldo by email %s", err)
 	}
 
 	return nil
