@@ -38,6 +38,13 @@ CREATE TABLE transaction(
     total_amount DECIMAL (15,2) NOT NULL,
     created_on TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE saldo(
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
+    balance DECIMAL (15,2) DEFAULT 0 NOT NULL
+);
+
 INSERT INTO service(service_code, service_name, service_icon, service_tariff) 
 VALUES
 ('PAJAK', 'PAJAK PBB', 'https://nutech-integrasi.app/dummy.jpg', 40000),

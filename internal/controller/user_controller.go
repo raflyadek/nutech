@@ -18,6 +18,8 @@ type UserService interface {
 	LoginUserByEmail(req dto.UserLoginRequest) (dto.UserLoginResponse, error)
 	UpdateUserByEmail(req dto.UserUpdateProfileRequest, email string) (dto.UserProfileResponse, error)
 	UpdateUserImageByEmail(req dto.UserUpdateImageRequest, email string) (dto.UserProfileResponse, error)
+	GetBalanceByEmail(email string) (dto.SaldoResponse, error)
+	UpdateBalanceByEmail(req dto.TopUpSaldoRequest, email string) (dto.SaldoResponse, error)
 }
 
 type UserController struct {
@@ -75,7 +77,7 @@ func (uc *UserController) GetUserProfileByEmail(c echo.Context) error {
 	user, ok := c.Get("user").(*jwt.Token)
 	//check safely jwt exists safely
 	if !ok || user == nil || !user.Valid {
-		return util.UnauthorizedResponse(c, "Token tidak tidak valid atau kadaluwarsa")
+		return util.UnauthorizedResponse(c, "Token tidak valid atau kadaluwarsa")
 	}
 
 	claim := user.Claims.(jwt.MapClaims)
@@ -94,7 +96,7 @@ func (uc *UserController) UpdateUserByEmail(c echo.Context) error {
 	user, ok := c.Get("user").(*jwt.Token)
 	//check if jwt exists safely
 	if !ok || user == nil || !user.Valid {
-		return util.UnauthorizedResponse(c, "Token tidak tidak valid atau kadaluwarsa")
+		return util.UnauthorizedResponse(c, "Token tidak valid atau kadaluwarsa")
 	}
 
 	claim := user.Claims.(jwt.MapClaims)
@@ -125,7 +127,7 @@ func (uc *UserController) UpdateUserImageByEmail(c echo.Context) error {
 	user, ok := c.Get("user").(*jwt.Token)
 	//check if jwt exists safely
 	if !ok || user == nil || !user.Valid {
-		return util.UnauthorizedResponse(c, "Token tidak tidak valid atau kadaluwarsa")
+		return util.UnauthorizedResponse(c, "Token tidak valid atau kadaluwarsa")
 	}
 
 	claim := user.Claims.(jwt.MapClaims)
@@ -142,7 +144,7 @@ func (uc *UserController) UpdateUserImageByEmail(c echo.Context) error {
 	if err := util.ValidateImage(file); err != nil {
 		return util.BadRequestResponse(c, err.Error())
 	}
-	
+
 	//path to save uploaded file
 	uniqueId := uuid.New().String()
 	fileName := uniqueId +file.Filename
@@ -165,4 +167,55 @@ func (uc *UserController) UpdateUserImageByEmail(c echo.Context) error {
 	}
 
 	return util.SuccessResponse(c, "Update Profile Image berhasil", resp)
+}
+
+func (uc *UserController) GetBalanceByEmail(c echo.Context) error {
+	user, ok := c.Get("user").(*jwt.Token)
+	//check if jwt exists safely
+	if !ok || user == nil || !user.Valid {
+		return util.UnauthorizedResponse(c, "Token tidak valid atau kadaluwarsa")
+	}
+
+	claim := user.Claims.(jwt.MapClaims)
+	//get email from jwt payload
+	email := claim["email"].(string)		
+
+	resp, err := uc.userService.GetBalanceByEmail(email)
+	if err != nil {
+		return util.InternalServerErrorResponse(c, err.Error())
+	}
+
+	return util.SuccessResponse(c, "Get Balance Berhasil", resp)
+}
+
+func (uc *UserController) UpdateBalanceByEmail(c echo.Context) error {
+	user, ok := c.Get("user").(*jwt.Token)
+	//check if jwt exists safely
+	if !ok || user == nil || !user.Valid {
+		return util.UnauthorizedResponse(c, "Token tidak valid atau kadaluwarsa")
+	}
+
+	claim := user.Claims.(jwt.MapClaims)
+	//get email from jwt payload
+	email := claim["email"].(string)
+
+	//validate request
+	req := new(dto.TopUpSaldoRequest)
+
+	//bind from request
+	if err := c.Bind(req); err != nil {
+		return util.BadRequestResponse(c, err.Error())
+	}
+
+	//validate request
+	if err := uc.validate.Struct(req); err != nil {
+		return util.BadRequestResponse(c, err.Error())
+	}
+
+	resp, err := uc.userService.UpdateBalanceByEmail(*req, email)
+	if err != nil {
+		return util.InternalServerErrorResponse(c, err.Error())
+	}
+
+	return util.SuccessResponse(c, "Top Up Balance Berhasil", resp)
 }

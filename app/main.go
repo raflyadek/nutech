@@ -74,6 +74,8 @@ func main() {
 	protectedRoute.PUT("/profile/update", userController.UpdateUserByEmail)
 	protectedRoute.PUT("/profile/image", userController.UpdateUserImageByEmail)
 	protectedRoute.GET("/services", servicesController.GetAllService)
+	protectedRoute.GET("/balance", userController.GetBalanceByEmail)
+	protectedRoute.POST("/topup", userController.UpdateBalanceByEmail)
 	
 	port := os.Getenv("PORT")
 	// if port empty just make it 8080
