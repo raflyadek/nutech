@@ -30,12 +30,15 @@ func main() {
 
 	//repository
 	userRepository := repository.NewUserRepository(db)
+	bannerRepository := repository.NewBannerRepository(db)
 
 	//service
 	userService := service.NewUserService(userRepository)
+	bannerService := service.NewBannerService(bannerRepository)
 
 	//controller
 	userController := controller.NewUserController(userService, validate)
+	bannerController := controller.NewBannerController(bannerService)
 
 	//http routing using echo
 	e := echo.New()
@@ -44,6 +47,7 @@ func main() {
 	//route
 	e.POST("/registration", userController.CreateUser)
 	e.POST("/login", userController.LoginUser)
+	e.GET("/banner", bannerController.GetAllBanner)
 	
 	//protected route
 	secretKey := os.Getenv("SECRET_KEY") 
