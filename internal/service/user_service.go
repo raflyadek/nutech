@@ -178,7 +178,7 @@ func(us *UserServ) UpdateBalanceByEmail(req dto.TopUpSaldoRequest, email string)
 
 	requestTransaction := entity.Transaction{
 		UserEmail: email,
-		ServiceCode: "TOPUP",
+		ServiceCode: "PULSA",
 		ServiceName: "TOPUP",
 		InvoiceNumber: invoiceNumber,
 		TransactionType: "TOPUP",
