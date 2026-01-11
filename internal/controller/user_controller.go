@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"fmt"
 	"nutech-test/internal/dto"
 	"nutech-test/util"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type UserService interface {
@@ -129,19 +131,27 @@ func (uc *UserController) UpdateUserImageByEmail(c echo.Context) error {
 	//get email from jwt payload
 	email := claim["email"].(string)	
 
-	req := new(dto.UserUpdateImageRequest)
-
-	//bind from request
-	if err := c.Bind(req); err != nil {
+	//retrieve uploaded image/file
+	file, err := c.FormFile("image")
+	if err != nil {
 		return util.BadRequestResponse(c, err.Error())
 	}
 
-	//validate request
-	if err := uc.validate.Struct(req); err != nil {
-		return util.BadRequestResponse(c, err.Error())
-	}	
+	//path to save uploaded file
+	uniqueId := uuid.New().String()
+	pathImage := "/Users/raflyadek/project_rafly/job/nutech/images/" +file.Filename
 
-	resp, err := uc.userService.UpdateUserImageByEmail(*req, email)
+	//save the file to the specified path
+	if err := util.SaveUploadFile(file, pathImage); err != nil {
+		return util.BadRequestResponse(c, err.Error())
+	}
+	pictureUrl := fmt.Sprintf("http://localhost:8080/images/%s/%s", uniqueId, file.Filename)
+
+	req := dto.UserUpdateImageRequest{
+		ProfileImage: pictureUrl,
+	}
+
+	resp, err := uc.userService.UpdateUserImageByEmail(req, email)
 	if err != nil {
 		return util.InternalServerErrorResponse(c, err.Error())
 	}

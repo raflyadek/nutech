@@ -8,7 +8,7 @@ CREATE TABLE users(
     first_name VARCHAR(100) NOT NULL, 
     last_name VARCHAR(100) NOT NULL, 
     password TEXT NOT NULL,
-    profile_image TEXT
+    profile_image TEXT DEFAULT ''
 );
 
 CREATE TABLE banner(
@@ -29,7 +29,7 @@ CREATE TYPE transaction_status AS ENUM ('pending', 'shipped', 'cancelled');
 
 CREATE TABLE transaction(
     id SERIAL PRIMARY KEY,
-    user_email VARCHAR(100) REFERENCES users(email),
+    user_email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
     invoice_number VARCHAR(100) NOT NULL,
     service_code VARCHAR(100) NOT NULL,
     service_name VARCHAR(100) NOT NULL,

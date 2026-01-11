@@ -20,7 +20,7 @@ func ConnectionDb() (*sql.DB, error) {
 	dbName := os.Getenv("DB_NAME")
 	pgPort := os.Getenv("PGPORT")
 	host := os.Getenv("HOST")
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s", host, pgPort, dbUserame, dbName)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable", host, pgPort, dbUserame, dbName)
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

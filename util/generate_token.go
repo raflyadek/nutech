@@ -13,7 +13,7 @@ func GenerateTokenJWT(id int, email string) (string, error) {
 		"id": id,
 		"email": email,
 		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Minute * 5).Unix(),
+		"exp": time.Now().Add(time.Minute * 20).Unix(),
 	})
 
 	secretKey := os.Getenv("SECRET_KEY")
