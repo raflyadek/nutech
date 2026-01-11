@@ -136,20 +136,25 @@ func(us *UserServ) GetBalanceByEmail(email string) (dto.SaldoResponse, error) {
 }
 
 func(us *UserServ) UpdateBalanceByEmail(req dto.TopUpSaldoRequest, email string) (dto.SaldoResponse, error) {
+	saldoBefore, err := us.GetBalanceByEmail(email)
+	if err != nil {
+		return dto.SaldoResponse{}, fmt.Errorf("get balance by email %s", err)
+	}
+
 	request := entity.Saldo{
-		Balance: req.Balance,
+		Balance: saldoBefore.Balance + req.Balance,
 		UserEmail: email,
 	}
-	
+
 	//validate the request body
 	if req.Balance <= 0 { 
-		errors.New("Paramter amount hanya boleh angka dan tidak boleh lebih kecil dari 0")
+		return dto.SaldoResponse{}, errors.New("Parameter amount hanya boleh angka dan tidak boleh lebih kecil dari 0")
 	}
 
 	//update saldo
-	_, err := us.userRepository.UpdateBalanceByEmail(&request)
+	_, errr := us.userRepository.UpdateBalanceByEmail(&request)
 	
-	if err != nil {
+	if errr != nil {
 		return dto.SaldoResponse{}, fmt.Errorf("update balance %s", err)
 	}
 

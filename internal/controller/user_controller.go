@@ -209,7 +209,7 @@ func (uc *UserController) UpdateBalanceByEmail(c echo.Context) error {
 
 	//validate request
 	if err := uc.validate.Struct(req); err != nil {
-		return util.BadRequestResponse(c, err.Error())
+		return util.BadRequestResponse(c, "Paramter amount hanya boleh angka dan tidak boleh lebih kecil dari 0")
 	}
 
 	resp, err := uc.userService.UpdateBalanceByEmail(*req, email)
