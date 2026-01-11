@@ -11,7 +11,7 @@ import (
 
 type TransactionRepository interface {
 	Create(transaction *entity.Transaction) error
-	GetAllTransactionByEmail(email string) ([]entity.Transaction, error)
+	GetAllTransactionByEmail(email string, limit int, offset int) ([]entity.Transaction, error)
 	GetTransactionByInvoice(invoice string) (entity.Transaction, error)
 }
 
@@ -95,19 +95,27 @@ func (ts *TransactionServ) CreateTransaction(req dto.TransactionRequest, email s
 	return resp, nil
 }
 
-func (ts *TransactionServ) GetAllTransactionByEmail(email string) ([]dto.TransactionHistoryResponse, error) {
-	transactions, err := ts.transactionRepository.GetAllTransactionByEmail(email)
+func (ts *TransactionServ) GetAllTransactionByEmail(
+	email string,
+	limit int,
+	offset int,
+) ([]dto.TransactionHistoryResponse, error) {
+
+	transactions, err := ts.transactionRepository.
+		GetAllTransactionByEmail(email, limit, offset)
+
 	if err != nil {
-		return []dto.TransactionHistoryResponse{}, fmt.Errorf("get all transaction %s", err)
+		return nil, fmt.Errorf("get all transaction: %w", err)
 	}
 
-	var resp []dto.TransactionHistoryResponse
+	resp := make([]dto.TransactionHistoryResponse, 0, len(transactions))
 	for _, transaction := range transactions {
 		resp = append(resp, dto.TransactionHistoryResponse(transaction))
 	}
 
 	return resp, nil
 }
+
 
 func (ts *TransactionServ) GetTransactionByInvoice(invoice string) (dto.TransactionResponse, error) {
 	transaction, err := ts.transactionRepository.GetTransactionByInvoice(invoice)

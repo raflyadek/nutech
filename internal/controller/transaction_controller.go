@@ -3,6 +3,7 @@ package controller
 import (
 	"nutech-test/internal/dto"
 	"nutech-test/util"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
@@ -11,7 +12,7 @@ import (
 
 type TransactionService interface {
 	CreateTransaction(req dto.TransactionRequest, email string) (dto.TransactionResponse, error)
-	GetAllTransactionByEmail(email string) ([]dto.TransactionHistoryResponse, error)
+	GetAllTransactionByEmail(email string, limit int, offset int) ([]dto.TransactionHistoryResponse, error)
 }
 
 type TransactionController struct {
@@ -65,7 +66,11 @@ func (tc *TransactionController) GetAllTransactionByEmail(c echo.Context) error 
 	//get email from jwt payload
 	email := claim["email"].(string)	
 
-	resp, err := tc.transactionService.GetAllTransactionByEmail(email)
+	// ambil query param (opsional)
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	offset, _ := strconv.Atoi(c.QueryParam("offset"))
+
+	resp, err := tc.transactionService.GetAllTransactionByEmail(email, limit, offset)
 	if err != nil {
 		return util.InternalServerErrorResponse(c, err.Error())
 	}

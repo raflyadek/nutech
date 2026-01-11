@@ -26,27 +26,50 @@ func (tr *TransactionRepo) Create(transaction *entity.Transaction) error {
 	return nil
 }
 
-func (tr *TransactionRepo) GetAllTransactionByEmail(email string) ([]entity.Transaction, error) {
-	rows, err := tr.db.QueryContext(context.Background(), `
-	SELECT invoice_number, transaction_type, description, total_amount, created_on FROM transaction`)
+func (tr *TransactionRepo) GetAllTransactionByEmail(
+	email string,
+	limit int,
+	offset int,
+) ([]entity.Transaction, error) {
+
+	query := `
+	SELECT invoice_number, transaction_type, description, total_amount, created_on
+	FROM "transaction"
+	WHERE user_email = $1
+	ORDER BY created_on DESC
+	`
+
+	args := []interface{}{email}
+
+	if limit > 0 {
+		query += " LIMIT $2 OFFSET $3"
+		args = append(args, limit, offset)
+	}
+
+	rows, err := tr.db.QueryContext(context.Background(), query, args...)
 	if err != nil {
-		return []entity.Transaction{}, err
+		return nil, err
 	}
 	defer rows.Close()
 
 	var transactions []entity.Transaction
-
 	for rows.Next() {
 		var t entity.Transaction
-		if err := rows.Scan(&t.InvoiceNumber, &t.TransactionType, &t.Description, &t.TotalAmount, &t.CreatedOn); err != nil {
-			return []entity.Transaction{}, err
+		if err := rows.Scan(
+			&t.InvoiceNumber,
+			&t.TransactionType,
+			&t.Description,
+			&t.TotalAmount,
+			&t.CreatedOn,
+		); err != nil {
+			return nil, err
 		}
-
 		transactions = append(transactions, t)
 	}
 
 	return transactions, nil
 }
+
 
 func (tr *TransactionRepo) GetTransactionByInvoice(invoice string) (entity.Transaction, error) {
 	var transaction entity.Transaction
