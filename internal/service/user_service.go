@@ -25,7 +25,7 @@ func NewUserService(ur UserRepository) *UserServ {
 	return &UserServ{userRepository: ur}
 }
 
-func(us *UserServ) Create(req dto.UserRegisterRequest) error {
+func(us *UserServ) CreateUser(req dto.UserRegisterRequest) error {
 	//hash the request password
 	passHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -46,7 +46,7 @@ func(us *UserServ) Create(req dto.UserRegisterRequest) error {
 	return nil
 }
 
-func(us *UserServ) GetUserByEmail(email string) (dto.UserProfileResponse, error) {
+func(us *UserServ) GetUserProfileByEmail(email string) (dto.UserProfileResponse, error) {
 	user, err := us.userRepository.GetByEmail(email)
 	if err != nil {
 		return dto.UserProfileResponse{}, fmt.Errorf("get user profile by email %s", err)
@@ -81,8 +81,12 @@ func(us *UserServ) LoginUserByEmail(req dto.UserLoginRequest) (dto.UserLoginResp
 	return resp, nil
 }
 
-func(us *UserServ) UpdateUserByEmail(req dto.UserUpdateProfileRequest) (dto.UserProfileResponse, error) {
-	request := entity.User(req)
+func(us *UserServ) UpdateUserByEmail(req dto.UserUpdateProfileRequest, email string) (dto.UserProfileResponse, error) {
+	request := entity.User{
+		FirstName: req.FirstName,
+		LastName: req.LastName,
+		Email: email,
+	}
 	user, err := us.userRepository.UpdateUserByEmail(&request)
 	if err != nil {
 		return dto.UserProfileResponse{}, fmt.Errorf("update user by email %s", err)
@@ -93,8 +97,11 @@ func(us *UserServ) UpdateUserByEmail(req dto.UserUpdateProfileRequest) (dto.User
 	return resp, nil
 }
 
-func(us *UserServ) UpdateUserImageByEmail(req dto.UserUpdateProfileRequest) (dto.UserProfileResponse, error) {
-	request := entity.User(req)
+func(us *UserServ) UpdateUserImageByEmail(req dto.UserUpdateImageRequest, email string) (dto.UserProfileResponse, error) {
+	request := entity.User{
+		ProfileImage: req.ProfileImage,
+		Email: email,
+	}
 	user, err := us.userRepository.UpdateImageByEmail(&request)
 	if err != nil {
 		return dto.UserProfileResponse{}, fmt.Errorf("update user image by email %s", err)
