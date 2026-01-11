@@ -1,0 +1,41 @@
+# Define custom variables for easy modification
+substitutions:
+  _AR_REPO_NAME: nutech-repo  # Artifact Registry repository name
+  _SERVICE_NAME: nutech-api   # Cloud Run service name
+  _REGION: asia-southeast2    # Jakarta region
+
+steps:
+
+# Run Unit Tests
+- name: 'golang:1.25.1'
+  entrypoint: 'go'
+  args: ['test', './...'] 
+  id: 'Run Unit Tests'
+
+# Build the Docker Image using Dockerfile
+# Cloud Build will use the Dockerfile in the current directory.
+- name: 'gcr.io/cloud-builders/docker'
+  args: 
+    - 'build'
+    - '-t'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/$_AR_REPO_NAME/$_SERVICE_NAME:$SHORT_SHA'
+    - '.'
+  id: 'Build Docker Image'
+
+# Deploy to Cloud Run
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - '$_SERVICE_NAME'
+    - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/$_AR_REPO_NAME/$_SERVICE_NAME:$SHORT_SHA'
+    - '--region=$_REGION'
+    - '--platform=managed'
+    - '--set-env-vars'
+    - 'SECRET_KEY=SECRET_KEY,POSTGRE_URL=POSTGRE_URL,PORT=8080'
+  id: 'Deploy to Cloud Run'
+
+# Tell Cloud Build to store the generated image in Artifact Registry
+images:
+- 'us-central1-docker.pkg.dev/$PROJECT_ID/$_AR_REPO_NAME/$_SERVICE_NAME:$SHORT_SHA'
