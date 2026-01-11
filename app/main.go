@@ -31,14 +31,17 @@ func main() {
 	//repository
 	userRepository := repository.NewUserRepository(db)
 	bannerRepository := repository.NewBannerRepository(db)
+	serviceRepository := repository.NewServiceRepository(db)
 
 	//service
 	userService := service.NewUserService(userRepository)
 	bannerService := service.NewBannerService(bannerRepository)
+	servicesService := service.NewServiceService(serviceRepository)
 
 	//controller
 	userController := controller.NewUserController(userService, validate)
 	bannerController := controller.NewBannerController(bannerService)
+	servicesController := controller.NewServiceController(servicesService)
 
 	//http routing using echo
 	e := echo.New()
@@ -70,6 +73,7 @@ func main() {
 	protectedRoute.GET("/profile", userController.GetUserProfileByEmail)
 	protectedRoute.PUT("/profile/update", userController.UpdateUserByEmail)
 	protectedRoute.PUT("/profile/image", userController.UpdateUserImageByEmail)
+	protectedRoute.GET("/services", servicesController.GetAllService)
 	
 	port := os.Getenv("PORT")
 	// if port empty just make it 8080

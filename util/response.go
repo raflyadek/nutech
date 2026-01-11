@@ -32,9 +32,7 @@ func sendResponse(c echo.Context, code int, status int, message string, data int
 	resp := map[string]interface{}{
 		"status":  status,
 		"message": message,
-	}
-	if data != nil {
-		resp["data"] = data
+		"data": data,
 	}
 	return c.JSON(code, resp)
 }
