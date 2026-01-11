@@ -13,7 +13,7 @@ import (
 
 func ConnectionDb() (*sql.DB, error) {
 	if err := godotenv.Load(); err != nil {
-		log.Printf("failed load env %s")
+		log.Printf("failed load env %s", err)
 	}
 
 	dbUserame := os.Getenv("DB_USERNAME")
