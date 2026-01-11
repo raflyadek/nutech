@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nutech-test/internal/dto"
 	"nutech-test/util"
+	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
@@ -137,15 +138,22 @@ func (uc *UserController) UpdateUserImageByEmail(c echo.Context) error {
 		return util.BadRequestResponse(c, err.Error())
 	}
 
+	//validate image png/jpeg
+	if err := util.ValidateImage(file); err != nil {
+		return util.BadRequestResponse(c, err.Error())
+	}
+	
 	//path to save uploaded file
 	uniqueId := uuid.New().String()
-	pathImage := "/Users/raflyadek/project_rafly/job/nutech/images/" +file.Filename
+	fileName := uniqueId +file.Filename
+	pathImage := filepath.Join("images", fileName)
 
 	//save the file to the specified path
 	if err := util.SaveUploadFile(file, pathImage); err != nil {
 		return util.BadRequestResponse(c, err.Error())
 	}
-	pictureUrl := fmt.Sprintf("http://localhost:8080/images/%s/%s", uniqueId, file.Filename)
+
+	pictureUrl := fmt.Sprintf("http://localhost:8080/images/%s%s", uniqueId, file.Filename)
 
 	req := dto.UserUpdateImageRequest{
 		ProfileImage: pictureUrl,
