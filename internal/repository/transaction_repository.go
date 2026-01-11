@@ -28,7 +28,7 @@ func (tr *TransactionRepo) Create(transaction *entity.Transaction) error {
 
 func (tr *TransactionRepo) GetAllTransactionByEmail(email string) ([]entity.Transaction, error) {
 	rows, err := tr.db.QueryContext(context.Background(), `
-	SELECT invoice_number, transaction_type, description, total_amount, created_on`)
+	SELECT invoice_number, transaction_type, description, total_amount, created_on FROM transaction`)
 	if err != nil {
 		return []entity.Transaction{}, err
 	}
@@ -38,7 +38,7 @@ func (tr *TransactionRepo) GetAllTransactionByEmail(email string) ([]entity.Tran
 
 	for rows.Next() {
 		var t entity.Transaction
-		if err := rows.Scan(t.InvoiceNumber, t.TransactionType, t.Description, t.TotalAmount, t.CreatedOn); err != nil {
+		if err := rows.Scan(&t.InvoiceNumber, &t.TransactionType, &t.Description, &t.TotalAmount, &t.CreatedOn); err != nil {
 			return []entity.Transaction{}, err
 		}
 
@@ -51,7 +51,7 @@ func (tr *TransactionRepo) GetAllTransactionByEmail(email string) ([]entity.Tran
 func (tr *TransactionRepo) GetTransactionByInvoice(invoice string) (entity.Transaction, error) {
 	var transaction entity.Transaction
 	err := tr.db.QueryRowContext(context.Background(), `
-	SELECT invoice_number, service_code, service_name, transaction_type, total_amount, created_on WHERE invoice_number = $1`, invoice,
+	SELECT invoice_number, service_code, service_name, transaction_type, total_amount, created_on FROM transaction WHERE invoice_number = $1`, invoice,
 	).Scan(&transaction.InvoiceNumber, &transaction.ServiceCode, &transaction.ServiceName, &transaction.TransactionType, &transaction.TotalAmount, &transaction.CreatedOn)
 
 	if err != nil {

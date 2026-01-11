@@ -19,7 +19,7 @@ type TransactionResponse struct {
 	ServiceCode string `json:"service_code"`
 	ServiceName string `json:"service_name"`
 	TransactionType string `json:"transaction_type"`
-	Description string `json:""`
+	Description string `json:"-"`
 	TotalAmount float64 `json:"total_amount"`
 	CreatedOn string `json:"created_on"`
 }

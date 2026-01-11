@@ -32,17 +32,19 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	bannerRepository := repository.NewBannerRepository(db)
 	serviceRepository := repository.NewServiceRepository(db)
-	
+	transactionRepository := repository.NewTransactionRepository(db)
 
 	//service
 	userService := service.NewUserService(userRepository)
 	bannerService := service.NewBannerService(bannerRepository)
 	servicesService := service.NewServiceService(serviceRepository)
+	transactionService := service.NewTransactionService(transactionRepository, serviceRepository, userRepository)
 
 	//controller
 	userController := controller.NewUserController(userService, validate)
 	bannerController := controller.NewBannerController(bannerService)
 	servicesController := controller.NewServiceController(servicesService)
+	transactionController := controller.NewTransactionController(transactionService, validate)
 
 	//http routing using echo
 	e := echo.New()
@@ -77,6 +79,8 @@ func main() {
 	protectedRoute.GET("/services", servicesController.GetAllService)
 	protectedRoute.GET("/balance", userController.GetBalanceByEmail)
 	protectedRoute.POST("/topup", userController.UpdateBalanceByEmail)
+	protectedRoute.POST("/transaction", transactionController.CreateTransaction)
+	protectedRoute.GET("/transaction/history", transactionController.GetAllTransactionByEmail)
 	
 	
 	port := os.Getenv("PORT")
