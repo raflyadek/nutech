@@ -7,6 +7,7 @@ import (
 	"nutech-test/internal/entity"
 	"nutech-test/util"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,12 +23,17 @@ type UserRepository interface {
 	CreateSaldoByEmail(saldo *entity.Saldo) error
 }
 
-type UserServ struct {
-	userRepository UserRepository	
+type TransactionRepos interface {
+	Create(transaction *entity.Transaction) error
 }
 
-func NewUserService(ur UserRepository) *UserServ {
-	return &UserServ{userRepository: ur}
+type UserServ struct {
+	userRepository UserRepository
+	transactionRepository TransactionRepos	
+}
+
+func NewUserService(ur UserRepository, tr TransactionRepos) *UserServ {
+	return &UserServ{userRepository: ur, transactionRepository: tr}
 }
 
 func(us *UserServ) CreateUser(req dto.UserRegisterRequest) error {
@@ -167,6 +173,26 @@ func(us *UserServ) UpdateBalanceByEmail(req dto.TopUpSaldoRequest, email string)
 		return dto.SaldoResponse{}, fmt.Errorf("update balance %s", err)
 	}
 
+	//using uuid more safely because its unique and we dont have to handle the race condition/concurrency
+	invoiceNumber := uuid.NewString()
+
+	requestTransaction := entity.Transaction{
+		UserEmail: email,
+		ServiceCode: "TOPUP",
+		ServiceName: "TOPUP",
+		InvoiceNumber: invoiceNumber,
+		TransactionType: "TOPUP",
+		Description: "TOPUP",
+		TotalAmount: req.Balance,
+	}
+	fmt.Println("masuk siniiisad")
+	//create payment
+	if err := us.transactionRepository.Create(&requestTransaction); err != nil {
+		fmt.Println("masuk sini")
+		return dto.SaldoResponse{}, fmt.Errorf("create transaction %s", err)
+	}
+	
+	fmt.Println("masuk siniasdasdqw")
 	//get updated saldo
 	resp, err := us.GetBalanceByEmail(email)
 	if err != nil {
