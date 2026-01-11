@@ -20,24 +20,32 @@ CREATE TABLE banner(
 
 CREATE TABLE service(
     id SERIAL PRIMARY KEY,
-    service_code VARCHAR(100) NOT NULL,
+    service_code VARCHAR(100) UNIQUE NOT NULL,
     service_name VARCHAR(100) NOT NULL,
     service_icon TEXT NOT NULL,
     service_tariff DECIMAL(15,2) NOT NULL CHECK (service_tariff > 0)
 );
 
-CREATE TYPE transaction_status AS ENUM ('pending', 'shipped', 'cancelled');
+CREATE TYPE transaction_status AS ENUM ('PAYMENT', 'TOPUP', 'CANCELLED');
 
 CREATE TABLE transaction(
     id SERIAL PRIMARY KEY,
     user_email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
     invoice_number VARCHAR(100) NOT NULL,
-    service_code VARCHAR(100) NOT NULL,
+    service_code VARCHAR(100) NOT NULL REFERENCES service(service_code),
     service_name VARCHAR(100) NOT NULL,
+    description VARCHAR(100) NOT NULL,
     transaction_type transaction_status,
     total_amount DECIMAL (15,2) NOT NULL,
     created_on TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE saldo(
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(100) REFERENCES users(email) ON DELETE CASCADE,
+    balance DECIMAL (15,2) DEFAULT 0 NOT NULL
+);
+
 INSERT INTO service(service_code, service_name, service_icon, service_tariff) 
 VALUES
 ('PAJAK', 'PAJAK PBB', 'https://nutech-integrasi.app/dummy.jpg', 40000),
